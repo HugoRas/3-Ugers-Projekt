@@ -9,11 +9,10 @@ import threading
 import time
 from tkinter import messagebox
 
-# Database connection
+# 📦 Database: Connects to SQLite and ensures tables exist
 conn = sqlite3.connect("EKGDATABASE.db", check_same_thread=False)
 cursor = conn.cursor()
 
-# Create tables if they don't exist
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Brugerdata (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +20,6 @@ CREATE TABLE IF NOT EXISTS Brugerdata (
     Alder INTEGER,
     KØN TEXT
     )""")
-conn.commit()
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Ekgdata (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,7 +33,7 @@ conn.commit()
 
 run = True
 
-
+# 🧪 Datahandler: Simulates EKG + pulse data and inserts into DB
 class Datahandler():
     def __init__(self, conn_local):
         cursor_local = conn_local.cursor()
@@ -47,7 +45,7 @@ class Datahandler():
         """, (1, puls, data))
         conn_local.commit()
 
-
+# 🔁 Background thread: Continuously inserts data while app is running
 def data_thread():
     global run
     conn_local = sqlite3.connect("EKGDATABASE.db")
@@ -62,21 +60,19 @@ def data_thread():
     conn_local.close()
 
 
+# 🖼️ Main GUI: Initializes all pages and handles navigation
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("EKG program")
-
-        width = 900
-        height = 600
-        self.geometry(f"{width}x{height}")
+        self.geometry("900x600")
         self.resizable(False, False)
 
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2) - 50
-        self.geometry(f"{width}x{height}+{x}+{y}")
+        x = (screen_width // 2) - (900 // 2)
+        y = (screen_height // 2) - (600 // 2) - 50
+        self.geometry(f"900x600+{x}+{y}")
 
         container = tk.Frame(self)
         container.pack(fill="both", expand=True)
@@ -170,7 +166,7 @@ class PageOne(tk.Frame):
             self.ax.set_facecolor('white')
             self.ax.plot(range(len(data_points)), data_points, color='black')
 
-            # Only thick red gridlines
+            # Thick red gridlines
             for x in range(0, len(data_points) + 1, 5):
                 self.ax.axvline(x=x, color='red', linewidth=1.0)
             for y in range(-80, 46, 10):
@@ -295,13 +291,14 @@ class Login(tk.Frame):
             self.patient_listbox.insert(tk.END, f"{navn} - {alder} år - {køn}")
 
 
+# ❌ Cleanup on close: Stops thread and closes DB connection
 def on_closing():
     global run
     run = False
     conn.close()
     app.destroy()
 
-
+# 🚀 App launch: Starts data thread and GUI loop
 if __name__ == "__main__":
     data_thread = threading.Thread(target=data_thread, daemon=True)
     data_thread.start()
