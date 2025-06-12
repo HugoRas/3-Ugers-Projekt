@@ -32,19 +32,24 @@ CREATE TABLE IF NOT EXISTS EKGDATA (
 conn.commit()
 
 run=True
-
-Navn = input("Skriv dit fulde navn: ")
-Alder = int(input("Skriv dit alder: "))
-Køn = str(input("Skriv dit køn: "))
-
-
-cursor.execute("INSERT INTO BRUGERDATA (Navn, Alder, KØN) VALUES (?, ?, ?)", (Navn, Alder, Køn))
-patient_id = cursor.lastrowid  # <-- Dette giver ID'et på den indsatte bruger
-conn.commit()
-
-print(f"Data gemt! Bruger-ID: {patient_id}")
+def NyData():
+    Navn = input("Skriv dit fulde navn: ")
+    Alder = int(input("Skriv dit alder: "))
+    Køn = str(input("Skriv dit køn: "))
 
 
-print("Data gemt!")
+    cursor.execute("INSERT INTO BRUGERDATA (Navn, Alder, KØN) VALUES (?, ?, ?)", (Navn, Alder, Køn))
+    patient_id = cursor.lastrowid  # <-- Dette giver ID'et på den indsatte bruger
+    conn.commit()
 
-conn.close()
+    print(f"Data gemt! Bruger-ID: {patient_id}")
+
+    conn.close()
+
+def main():
+    NyData()
+
+main()
+
+
+
