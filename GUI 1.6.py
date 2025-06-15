@@ -1,16 +1,16 @@
-# ✅ Samlet og rettet version af hele EKG-visualiseringsprogrammet
-
 import tkinter as tk
 from tkinter import Frame, ttk
-import random
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sqlite3
 import threading
-import time
 from tkinter import messagebox
 import io
 import serial
+from collections import deque
+from scipy.signal import find_peaks
+import numpy as np
+from datetime import datetime
 
 # COM-port og baudrate
 COMport = "/dev/cu.usbmodem2101"
@@ -133,6 +133,8 @@ class PageOne(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="lightgreen")
         self.controller = controller
+        self.ekg_buffer = deque(maxlen=5000)  # ca. 10 sek ved 500 Hz
+        self.tid_buffer = deque(maxlen=5000)
 
         label = tk.Label(self, text="Dynamisk EKG diagram og puls", bg="lightgreen",
                          font=("Helvetica", 18, "bold"))
@@ -164,11 +166,26 @@ class PageOne(tk.Frame):
 
         self.update_data()
 
+    def beregn_puls(self, data, tider):
+        if len(data) < 10:
+            return None
+        try:
+            sekunder = np.array([(t - tider[0]).total_seconds() for t in tider])
+            signal = np.array(data)
+            peaks, _ = find_peaks(signal, height=0.4, distance=250)  # justér efter signal og samplingrate
+            if len(peaks) < 2:
+                return None
+            rr = np.diff(sekunder[peaks])
+            rr_mean = np.mean(rr)
+            return 60 / rr_mean if rr_mean > 0 else None
+        except:
+            return None
+
     def update_data(self):
         if not run:
             return
 
-        cursor.execute("SELECT Data, Puls FROM Ekgdata WHERE PatientID = 1 ORDER BY Id DESC LIMIT 50")
+        cursor.execute("SELECT Data FROM Ekgdata WHERE PatientID = 1 ORDER BY Id DESC LIMIT 50")
         results = cursor.fetchall()
 
         if results:
@@ -181,7 +198,7 @@ class PageOne(tk.Frame):
 
             for x in range(0, len(data_points) + 1, 5):
                 self.ax.axvline(x=x, color='red', linewidth=1.0)
-            for y in range(-80, 46, 10):
+            for y in range(-100, 300, 600, 900):
                 self.ax.axhline(y=y, color='red', linewidth=1.0)
 
             self.ax.set_title("EKG diagram")
@@ -192,7 +209,26 @@ class PageOne(tk.Frame):
             self.ax.tick_params(axis='y', labelsize=8)
 
             self.canvas.draw()
+
+            # Fyld buffer til pulsberegning
+            cursor.execute("SELECT Tidspunkt, Data FROM Ekgdata WHERE PatientID = 1 ORDER BY Id DESC LIMIT 100")
+            rows = cursor.fetchall()[::-1]  # korrekt rækkefølge
+
             self.puls_label.config(text=str(latest_pulse))
+
+            for tid, val in rows:
+                try:
+                    self.ekg_buffer.append(float(val))
+                    self.tid_buffer.append(datetime.fromisoformat(tid))
+                except:
+                    continue
+
+            # Beregn dynamisk puls
+            dynamisk_puls = self.beregn_puls(list(self.ekg_buffer), list(self.tid_buffer))
+            if dynamisk_puls:
+                self.puls_label.config(text=f"{int(dynamisk_puls)} BPM")
+            else:
+                self.puls_label.config(text="--")
 
         self.after(100, self.update_data)
 
