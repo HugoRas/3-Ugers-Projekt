@@ -11,7 +11,7 @@ from scipy.signal import find_peaks
 import numpy as np
 from datetime import datetime
 
-COMport = "/dev/cu.usbmodem2101"
+COMport = "COM5"
 baud = 38400
 
 conn = sqlite3.connect("EKGDATABASE.db", check_same_thread=False)
@@ -183,7 +183,7 @@ class PageOne(tk.Frame):
         try:
             sekunder = np.array([(t - tider[0]).total_seconds() for t in tider])
             signal = np.array(data)
-            peaks, _ = find_peaks(signal, height=0.4, distance=250)
+            peaks, _ = find_peaks(signal, height=1000, distance=550)
             if len(peaks) < 2:
                 return None
             rr = np.diff(sekunder[peaks])
@@ -217,10 +217,10 @@ class PageOne(tk.Frame):
                 self.ax.axhline(y=y, color='red', linewidth=1.0)
 
             self.ax.set_title("EKG diagram")
-            self.ax.set_ylim(-80, 45)
+            self.ax.set_ylim(100, 2000)
             self.ax.set_xlim(0, len(data_points) - 1)
             self.ax.set_xticks([])
-            self.ax.set_yticks(range(-80, 46, 10))
+            self.ax.set_yticks(range(0,1000,2000))
             self.ax.tick_params(axis='y', labelsize=8)
             self.canvas.draw()
 
@@ -242,7 +242,7 @@ class PageOne(tk.Frame):
             else:
                 self.puls_label.config(text="--")
 
-        self.after(100, self.update_data)
+        self.after(1,self.update_data)
 
 class PageTwo(tk.Frame):
     def __init__(self, parent, controller):
