@@ -1,22 +1,20 @@
-# ✅ Samlet og rettet version af hele EKG-visualiseringsprogrammet
-
 import tkinter as tk
-from tkinter import Frame, ttk
-import random
+from tkinter import Frame, ttk, messagebox
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sqlite3
 import threading
-import time
-from tkinter import messagebox
 import io
 import serial
+from collections import deque
+from scipy.signal import find_peaks
+from scipy.ndimage import uniform_filter1d
+import numpy as np
+from datetime import datetime
 
-# COM-port og baudrate
-COMport = "/dev/cu.usbmodem2101"
+COMport = "COM5"
 baud = 38400
 
-# Databaseforbindelse
 conn = sqlite3.connect("EKGDATABASE.db", check_same_thread=False)
 cursor = conn.cursor()
 
@@ -26,7 +24,7 @@ CREATE TABLE IF NOT EXISTS Brugerdata (
     Navn TEXT,
     Alder INTEGER,
     KØN TEXT
-    )""")
+)""")
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Ekgdata (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,16 +33,17 @@ CREATE TABLE IF NOT EXISTS Ekgdata (
     Data REAL,
     Puls INTEGER,
     FOREIGN KEY (PatientID) REFERENCES Brugerdata(Id)
-    )""")
+)""")
 conn.commit()
 
 run = True
 
-# Datahandler
 class Datahandler():
-    def __init__(self, conn_local):
+    def __init__(self, conn_local, patient_id):
         self.conn_local = conn_local
         self.cursor_local = conn_local.cursor()
+        self.patient_id = patient_id
+        self.buffer = deque(maxlen=300)
 
     def serialdata(self, com):
         try:
@@ -55,27 +54,38 @@ class Datahandler():
                     data = sio.readline().strip()
                     if not data:
                         continue
+
+                    value = float(data)
+                    self.buffer.append(value)
+
+                    if len(self.buffer) >= 100:
+                        puls = self.beregn_puls()
+                    else:
+                        puls = None
+
+                    now = datetime.now().isoformat(timespec='microseconds')
                     self.cursor_local.execute("""
-                        INSERT INTO Ekgdata (PatientID, Data, Tidspunkt)
-                        VALUES (?, ?, datetime('now'))
-                    """, (1, float(data)))
+                        INSERT INTO Ekgdata (PatientID, Data, Tidspunkt, Puls)
+                        VALUES (?, ?, ?, ?)
+                    """, (self.patient_id, value, now, puls))
                     self.conn_local.commit()
                 except Exception as e:
                     print("Fejl ved læsning/indsættelse:", e)
         except Exception as e:
             print("Serialfejl:", e)
 
-# Baggrundstråd
+    def beregn_puls(self):
+        peaks, _ = find_peaks(self.buffer, height=1000, distance=40, prominence=200)
+        if len(peaks) < 2:
+            return None
+        rr_intervaller = np.diff(peaks)
+        if len(rr_intervaller) == 0:
+            return None
+        rr_mean = np.mean(rr_intervaller)
+        fs = 250  # samplingsfrekvens
+        sek_per_peak = rr_mean / fs
+        return int(60 / sek_per_peak) if sek_per_peak > 0 else None
 
-def data_thread_func():
-    global run
-    conn_local = sqlite3.connect("EKGDATABASE.db")
-    try:
-        Datahandler(conn_local).serialdata(COMport)
-    finally:
-        conn_local.close()
-
-# GUI
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -94,6 +104,7 @@ class App(tk.Tk):
 
         self.frames = {}
         self.pulse_history = []
+        self.selected_patient_id = None
 
         for F in (StartPage, PageOne, PageTwo, Login):
             frame = F(parent=container, controller=self)
@@ -114,34 +125,40 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text="Hovedmenu", font=("Helvetica", 18, "bold"), bg="lightblue")
         label.place(relx=0.02, rely=0.02, anchor="nw")
 
-        btn1 = tk.Button(self, text="Dynamisk EKG diagram og puls", bg="lightblue",
-                         borderwidth=0, highlightthickness=0, padx=10, pady=4,
-                         command=lambda: controller.show_frame(PageOne))
-        btn1.pack(pady=(80, 10))
+        tk.Button(self, text="Dynamisk EKG diagram og puls", bg="lightblue",
+                  borderwidth=0, highlightthickness=0, padx=10, pady=4,
+                  command=lambda: [controller.frames[PageOne].load_patients(), controller.show_frame(PageOne)]).pack(
+            pady=(80, 10))
 
-        btn2 = tk.Button(self, text="Målinger", bg="lightblue",
-                         borderwidth=0, highlightthickness=0, padx=10, pady=4,
-                         command=lambda: controller.show_frame(PageTwo))
-        btn2.pack()
+        tk.Button(self, text="Målinger", bg="lightblue",
+                  borderwidth=0, highlightthickness=0, padx=10, pady=4,
+                  command=lambda: controller.show_frame(PageTwo)).pack()
 
-        btn3 = tk.Button(self, text="Login / Patienter", bg="lightblue",
-                         borderwidth=0, highlightthickness=0, padx=10, pady=4,
-                         command=lambda: controller.show_frame(Login))
-        btn3.pack(pady=(10, 0))
+        tk.Button(self, text="Login / Patienter", bg="lightblue",
+                  borderwidth=0, highlightthickness=0, padx=10, pady=4,
+                  command=lambda: controller.show_frame(Login)).pack(pady=(10, 0))
 
 class PageOne(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg="lightgreen")
         self.controller = controller
+        self.ekg_buffer = deque(maxlen=5000)
+        self.tid_buffer = deque(maxlen=5000)
+        self.smooth_pulse = None  # glattet puls
 
-        label = tk.Label(self, text="Dynamisk EKG diagram og puls", bg="lightgreen",
-                         font=("Helvetica", 18, "bold"))
-        label.place(relx=0.02, rely=0.02, anchor="nw")
+        tk.Label(self, text="Dynamisk EKG diagram og puls", bg="lightgreen",
+                 font=("Helvetica", 18, "bold")).place(relx=0.02, rely=0.02, anchor="nw")
 
         self.puls_label = tk.Label(self, text="--", font=("Helvetica", 26, "bold"),
                                    fg="red", bg="lightgreen")
         tk.Label(self, text="Puls", font=("Helvetica", 18), bg="lightgreen").place(relx=0.85, rely=0.22)
         self.puls_label.place(relx=0.85, rely=0.3)
+
+        self.patient_var = tk.StringVar()
+        self.patient_dropdown = ttk.Combobox(self, textvariable=self.patient_var, state="readonly")
+        self.patient_dropdown.place(relx=0.7, rely=0.05)
+        self.patient_dropdown.bind("<<ComboboxSelected>>", self.patient_selected)
+        self.load_patients()
 
         container_frame = Frame(self, bg="lightgreen")
         container_frame.place(relx=0.05, rely=0.15)
@@ -152,23 +169,76 @@ class PageOne(tk.Frame):
 
         self.fig = Figure(figsize=(6, 4.5), dpi=100, facecolor='lightgreen')
         self.ax = self.fig.add_subplot(111)
-
         self.canvas = FigureCanvasTkAgg(self.fig, master=plot_frame)
         self.canvas.get_tk_widget().pack(expand=True, fill="both")
 
-        back_btn = tk.Button(self, text="Tilbage",
-                             borderwidth=0, highlightthickness=0,
-                             padx=10, pady=4,
-                             command=lambda: controller.show_frame(StartPage))
-        back_btn.place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)
+        tk.Button(self, text="Tilbage", borderwidth=0, highlightthickness=0,
+                  padx=10, pady=4, command=lambda: controller.show_frame(StartPage)).place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)
 
         self.update_data()
+
+    def load_patients(self):
+        cursor.execute("SELECT Id, Navn FROM Brugerdata")
+        self.patients = cursor.fetchall()
+        names = [f"{navn} (ID: {pid})" for pid, navn in self.patients]
+        self.patient_dropdown['values'] = names
+        if names:
+            self.patient_dropdown.current(0)
+            self.patient_selected()
+
+    def patient_selected(self, event=None):
+        index = self.patient_dropdown.current()
+        if index >= 0:
+            patient_id, _ = self.patients[index]
+            self.controller.selected_patient_id = patient_id
+
+            # Start datatråd én gang
+            if not hasattr(self.controller, "data_thread_started"):
+                self.controller.data_thread_started = True
+                conn_local = sqlite3.connect("EKGDATABASE.db")
+                thread = threading.Thread(
+                    target=lambda: Datahandler(conn_local, patient_id).serialdata(COMport),
+                    daemon=True)
+                thread.start()
+
+    def beregn_puls(self, data, tider):
+        if len(data) < 10:
+            return None
+        try:
+            sekunder = np.array([(t - tider[0]).total_seconds() for t in tider])
+            signal = np.array(data)
+
+            # Lavpasfilter
+            signal = uniform_filter1d(signal, size=5)
+
+            # Find peaks
+            peaks, _ = find_peaks(signal, height=1000, distance=200, prominence=300)
+            if len(peaks) < 2:
+                return None
+
+            # RR-interval (sekunder)
+            rr_intervaller = np.diff(sekunder[peaks])
+            rr_intervaller = rr_intervaller[(rr_intervaller > 0.3) & (rr_intervaller < 2.0)]  # 30–120 BPM
+
+            if len(rr_intervaller) == 0:
+                return None
+
+            rr_mean = np.mean(rr_intervaller[-5:])
+            return 60 / rr_mean if rr_mean > 0 else None
+        except Exception as e:
+            print("Pulsfejl:", e)
+            return None
 
     def update_data(self):
         if not run:
             return
 
-        cursor.execute("SELECT Data, Puls FROM Ekgdata WHERE PatientID = 1 ORDER BY Id DESC LIMIT 50")
+        patient_id = self.controller.selected_patient_id
+        if not patient_id:
+            self.after(1000, self.update_data)
+            return
+
+        cursor.execute("SELECT Data, Puls FROM Ekgdata WHERE PatientID = ? ORDER BY Id DESC LIMIT 150", (patient_id,))
         results = cursor.fetchall()
 
         if results:
@@ -179,22 +249,52 @@ class PageOne(tk.Frame):
             self.ax.set_facecolor('white')
             self.ax.plot(range(len(data_points)), data_points, color='black')
 
-            for x in range(0, len(data_points) + 1, 5):
-                self.ax.axvline(x=x, color='red', linewidth=1.0)
-            for y in range(-80, 46, 10):
-                self.ax.axhline(y=y, color='red', linewidth=1.0)
+            # Ny: gitter og aksemærkninger
+            self.ax.grid(True, which='both', linestyle='--', linewidth=0.5, color='gray', alpha=0.7)  # <-- ny
+            self.ax.set_xlabel("Tid (målepunkt #)")  # <-- ny
+            self.ax.set_ylabel("Amplitude (AD værdi)")  # <-- ny
+            step = max(1, len(data_points) // 10)  # <-- ny
+            self.ax.set_xticks(range(0, len(data_points), step))  # <-- ny
+            self.ax.set_xticklabels([str(i) for i in range(0, len(data_points), step)], rotation=45)  # <-- ny
 
             self.ax.set_title("EKG diagram")
-            self.ax.set_ylim(-80, 45)
+            self.ax.set_ylim(-100, 4500)
             self.ax.set_xlim(0, len(data_points) - 1)
-            self.ax.set_xticks([])
-            self.ax.set_yticks(range(-80, 46, 10))
-            self.ax.tick_params(axis='y', labelsize=8)
-
+            self.ax.tick_params(axis='both', labelsize=8)
             self.canvas.draw()
+
+            cursor.execute("SELECT Tidspunkt, Data FROM Ekgdata WHERE PatientID = ? ORDER BY Id DESC LIMIT 100", (patient_id,))
+            rows = cursor.fetchall()[::-1]
+
             self.puls_label.config(text=str(latest_pulse))
 
-        self.after(100, self.update_data)
+            for tid, val in rows:
+                try:
+                    self.ekg_buffer.append(float(val))
+                    self.tid_buffer.append(datetime.fromisoformat(tid))
+                except:
+                    continue
+
+            dynamisk_puls = self.beregn_puls(list(self.ekg_buffer), list(self.tid_buffer))
+            if dynamisk_puls:
+                if self.smooth_pulse is None:
+                    self.smooth_pulse = dynamisk_puls
+                else:
+                    self.smooth_pulse = 0.3 * dynamisk_puls + 0.7 * self.smooth_pulse  # glat overgang
+                self.puls_label.config(text=f"{int(self.smooth_pulse)} BPM")
+                # Opdater seneste puls i databasen
+                cursor.execute("""
+                        UPDATE Ekgdata
+                        SET Puls = ?
+                        WHERE PatientID = ? AND Id = (
+                            SELECT Id FROM Ekgdata WHERE PatientID = ? ORDER BY Id DESC LIMIT 1
+                        )
+                    """, (int(self.smooth_pulse), patient_id, patient_id))
+                conn.commit()
+            else:
+                self.puls_label.config(text="--")
+
+        self.after(3,self.update_data)
 
 class PageTwo(tk.Frame):
     def __init__(self, parent, controller):
@@ -283,6 +383,8 @@ class Login(tk.Frame):
         conn.commit()
 
         messagebox.showinfo("Succes", f"Patient {name} oprettet.")
+        if self.controller:
+            self.controller.frames[PageOne].load_patients()
         self.entry_name.delete(0, tk.END)
         self.entry_age.delete(0, tk.END)
         self.entry_gender.delete(0, tk.END)
@@ -293,18 +395,14 @@ class Login(tk.Frame):
         for navn, alder, køn in cursor.fetchall():
             self.patient_listbox.insert(tk.END, f"{navn} - {alder} år - {køn}")
 
-# Lukning
-
 def on_closing():
     global run
     run = False
     conn.close()
     app.destroy()
 
-# Start GUI og tråd
 if __name__ == "__main__":
-    thread = threading.Thread(target=data_thread_func, daemon=True)
-    thread.start()
     app = App()
+    setattr(app, "selected_patient_id", None)
     app.protocol("WM_DELETE_WINDOW", on_closing)
     app.mainloop()
