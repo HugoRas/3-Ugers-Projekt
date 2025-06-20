@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5a38593b-4b61-4cc8-a4ec-ebede5cee44d" name="Changes" comment="GUI 1.9 i Main">
+      <change afterPath="$PROJECT_DIR$/GUI Dokumentation + Funktion uden format.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GUI 1.6.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI 1.6.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="1.6-+-BPM" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;HugoRas&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/HugoRas/3-Ugers-Projekt.git&quot;,
+    &quot;accountId&quot;: &quot;cf4d4dc9-5f6e-4a55-906b-a43c4acf6f21&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2yHWewQst1vRle6TPDS3gPNoWy1" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.EKG_program_med_gitter.executor&quot;: &quot;Run&quot;,
+    &quot;Python.GUI 1.0.executor&quot;: &quot;Run&quot;,
+    &quot;Python.GUI 1.5.executor&quot;: &quot;Run&quot;,
+    &quot;Python.GUI 1.6.executor&quot;: &quot;Run&quot;,
+    &quot;Python.GUI 1.7 chatversion.executor&quot;: &quot;Run&quot;,
+    &quot;Python.GUI Original.executor&quot;: &quot;Run&quot;,
+    &quot;Python.SQL_0.1.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test 1.4.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_annotated.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_clean_grid.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_final_clean_and_simple.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_fully_annotated.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_fully_annotated_fixed.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_fully_annotated_fixed_clean.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_fully_annotated_simple_clean.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_grid_fixed.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_grid_ticks.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_matched.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Test_1.4_EKG_reindented_part.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Python.EKG_program_med_gitter">
+    <configuration name="EKG_program_med_gitter" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="3-Ugers-Projekt" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.12" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Downloads" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$USER_HOME$/Downloads/EKG_program_med_gitter.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="GUI 1.6" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="3-Ugers-Projekt" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.12" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GUI 1.6.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26574.90" />
+        <option value="bundled-python-sdk-c1fac28bca04-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26574.90" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5a38593b-4b61-4cc8-a4ec-ebede5cee44d" name="Changes" comment="" />
+      <created>1749492077682</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1749492077682</updated>
+      <workItem from="1749492078776" duration="92000" />
+      <workItem from="1749492176420" duration="1558000" />
+      <workItem from="1749493821278" duration="54000" />
+      <workItem from="1749573840881" duration="1822000" />
+      <workItem from="1749649957973" duration="2048000" />
+      <workItem from="1749977622295" duration="2371000" />
+      <workItem from="1749992425621" duration="1168000" />
+      <workItem from="1750230837992" duration="1598000" />
+      <workItem from="1750232554994" duration="601000" />
+      <workItem from="1750417085277" duration="1721000" />
+    </task>
+    <task id="LOCAL-00001" summary="Test af database">
+      <option name="closed" value="true" />
+      <created>1749493739445</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1749493739445</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Test af database">
+      <option name="closed" value="true" />
+      <created>1749650754669</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1749650754669</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Test af database">
+      <option name="closed" value="true" />
+      <created>1749651976991</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1749651976991</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Test af database">
+      <option name="closed" value="true" />
+      <created>1749652007635</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1749652007635</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Test af database">
+      <option name="closed" value="true" />
+      <created>1749980195297</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1749980195297</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Chatversion 1.7 i branch">
+      <option name="closed" value="true" />
+      <created>1749993576603</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1749993576603</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Chatversion 1.7 i branch">
+      <option name="closed" value="true" />
+      <created>1749993588331</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1749993588331</updated>
+    </task>
+    <task id="LOCAL-00008" summary="GUI 1.9 i Main">
+      <option name="closed" value="true" />
+      <created>1750233142408</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1750233142408</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Test af database" />
+    <MESSAGE value="Chatversion 1.7 i branch" />
+    <MESSAGE value="GUI 1.9 i Main" />
+    <option name="LAST_COMMIT_MESSAGE" value="GUI 1.9 i Main" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$GUI_1_5.coverage" NAME="GUI 1.5 Coverage Results" MODIFIED="1749651692486" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_annotated.coverage" NAME="Test_1.4_EKG_annotated Coverage Results" MODIFIED="1749651842278" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_grid_ticks.coverage" NAME="Test_1.4_EKG_grid_ticks Coverage Results" MODIFIED="1749650649861" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_grid_fixed.coverage" NAME="Test_1.4_EKG_grid_fixed Coverage Results" MODIFIED="1749650564543" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_matched.coverage" NAME="Test_1.4_EKG_matched Coverage Results" MODIFIED="1749650380589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$GUI_Original.coverage" NAME="GUI Original Coverage Results" MODIFIED="1749650102778" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_fully_annotated_fixed.coverage" NAME="Test_1.4_EKG_fully_annotated_fixed Coverage Results" MODIFIED="1749651367170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_clean_grid.coverage" NAME="Test_1.4_EKG_clean_grid Coverage Results" MODIFIED="1749650703574" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$EKG_program_med_gitter.coverage" NAME="EKG_program_med_gitter Coverage Results" MODIFIED="1750233038244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_fully_annotated_fixed_clean.coverage" NAME="Test_1.4_EKG_fully_annotated_fixed_clean Coverage Results" MODIFIED="1749651430626" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_reindented_part.coverage" NAME="Test_1.4_EKG_reindented_part Coverage Results" MODIFIED="1749651335491" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_fully_annotated_simple_clean.coverage" NAME="Test_1.4_EKG_fully_annotated_simple_clean Coverage Results" MODIFIED="1749651512987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_final_clean_and_simple.coverage" NAME="Test_1.4_EKG_final_clean_and_simple Coverage Results" MODIFIED="1749651564231" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$GUI_1_7_chatversion.coverage" NAME="GUI 1.7 chatversion Coverage Results" MODIFIED="1749993448558" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$SQL_0_1.coverage" NAME="SQL_0.1 Coverage Results" MODIFIED="1749493659771" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4.coverage" NAME="Test 1.4 Coverage Results" MODIFIED="1749584353389" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$GUI_1_0.coverage" NAME="GUI 1.0 Coverage Results" MODIFIED="1749573884726" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/3_Ugers_Projekt$Test_1_4_EKG_fully_annotated.coverage" NAME="Test_1.4_EKG_fully_annotated Coverage Results" MODIFIED="1749651047118" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$USER_HOME$/Downloads" />
+  </component>
+</project>
