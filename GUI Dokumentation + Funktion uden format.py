@@ -174,26 +174,30 @@ class StartPage(tk.Frame):
 class PageOne(tk.Frame):
     # Initialiserer en side i GUI med de nødvendige widgets.
     def __init__(self, parent, controller):
-        super().__init__(parent, bg="lightgreen")
+        super().__init__(parent, bg="lightgreen") #Arver fra tk.Frame
         self.controller = controller
+
+        # buffere til ekgdata og tid. (Benyttes til pulsberegning)
         self.ekg_buffer = deque(maxlen=5000)
         self.tid_buffer = deque(maxlen=5000)
-        self.smooth_pulse = None  # glattet puls
+        self.smooth_pulse = None  # glattet puls variabel
 
-        tk.Label(self, text="Dynamisk EKG diagram og puls", bg="lightgreen",
+        tk.Label(self, text="Dynamisk EKG diagram og puls", bg="lightgreen", #Titel
                  font=("Helvetica", 18, "bold")).place(relx=0.02, rely=0.02, anchor="nw")
 
         self.puls_label = tk.Label(self, text="--", font=("Helvetica", 26, "bold"),
                                    fg="red", bg="lightgreen")
-        tk.Label(self, text="Puls", font=("Helvetica", 18), bg="lightgreen").place(relx=0.85, rely=0.22)
-        self.puls_label.place(relx=0.85, rely=0.3)
+        tk.Label(self, text="Puls", font=("Helvetica", 18), bg="lightgreen").place(relx=0.85, rely=0.22) #puls tekst
+        self.puls_label.place(relx=0.85, rely=0.3) #Viser aktuel puls. Er bundet til update_data funktionen
 
+        #Dropdown med patientvalg (ID og Navn) Ved valg kaldes patient_selected
         self.patient_var = tk.StringVar()
         self.patient_dropdown = ttk.Combobox(self, textvariable=self.patient_var, state="readonly")
         self.patient_dropdown.place(relx=0.7, rely=0.05)
         self.patient_dropdown.bind("<<ComboboxSelected>>", self.patient_selected)
         self.load_patients()
 
+        #Rammer til grafområde
         container_frame = Frame(self, bg="lightgreen")
         container_frame.place(relx=0.05, rely=0.15)
 
@@ -201,14 +205,17 @@ class PageOne(tk.Frame):
         plot_frame.pack()
         plot_frame.pack_propagate(False)
 
+        #Opretter matplotlib figur i TKinter
         self.fig = Figure(figsize=(6, 4.5), dpi=100, facecolor='lightgreen')
         self.ax = self.fig.add_subplot(111)
         self.canvas = FigureCanvasTkAgg(self.fig, master=plot_frame)
         self.canvas.get_tk_widget().pack(expand=True, fill="both")
 
+        #Knap tilbage til StartPage
         tk.Button(self, text="Tilbage", borderwidth=0, highlightthickness=0,
                   padx=10, pady=4, command=lambda: controller.show_frame(StartPage)).place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)
 
+        #Starter realtidsopdatering
         self.update_data()
 
         # Trådrelateret
@@ -220,34 +227,37 @@ class PageOne(tk.Frame):
         # Stop-knap
         tk.Button(self, text="Stop måling", command=self.stop_measurement).place(relx=0.7, rely=0.15)
 
-        self.smooth_pulses = []  # Her gemmer vi alle visninger af smooth puls
+        # Her gemmer vi alle visninger af smooth puls
+        self.smooth_pulses = []
 
     # Indlæser patienter fra databasen til dropdown-menuen.
     def load_patients(self):
-        cursor.execute("SELECT Id, Navn FROM Brugerdata")
+        cursor.execute("SELECT Id, Navn FROM Brugerdata") #Henter ID og navn
         self.patients = cursor.fetchall()
-        names = [f"{navn} (ID: {pid})" for pid, navn in self.patients]
-        self.patient_dropdown['values'] = names
-        if names:
+        names = [f"{navn} (ID: {pid})" for pid, navn in self.patients] #For hvert navn omdannes det til pæn string
+        self.patient_dropdown['values'] = names #Insættes i dropdown
+        if names: #Ved navne vælges første patient, og patient_selected kaldes så korrekt ID sættes som variabel
             self.patient_dropdown.current(0)
             self.patient_selected()
 
     # Stopper målingen og gemmer gennemsnitspulsen i databasen.
     def stop_measurement(self):
-        if self.data_thread and self.data_thread.is_alive():
-            print("🛑 Måling stoppes manuelt")
+        if self.data_thread and self.data_thread.is_alive(): #Tjekker om tråd køres (Der er aktiv måling)
+            print("Måling stoppes manuelt") #Sender stop besked til tråd og variable ryddes op
             self.stop_event.set()
             self.data_thread.join()
             self.data_thread = None
             self.stop_event = None
 
-            # ✅ Trin 3 – Gem gennemsnit af smooth_pulse i Pulsmålinger
+            # Gemmer gennemsnit af smooth_pulse i Pulsmålinger
             if self.smooth_pulses:
-                avg_pulse = int(round(np.mean(self.smooth_pulses)))
-                cursor.execute("INSERT INTO Pulsmålinger (PatientID, Puls) VALUES (?, ?)",
+                avg_pulse = int(round(np.mean(self.smooth_pulses))) #Gennemsnitspulsen regnes fra liste
+                cursor.execute("INSERT INTO Pulsmålinger (PatientID, Puls) VALUES (?, ?)", #Indsættes i DB
                                (self.controller.selected_patient_id, avg_pulse))
                 conn.commit()
-                print(f"💾 Gemte gennemsnitlig puls: {avg_pulse}")
+
+                #Beskedbokse
+                print(f"Gemte gennemsnitlig puls: {avg_pulse}")
                 messagebox.showinfo("Måling stoppet", f"Målingen er stoppet.\nGennemsnitlig puls: {avg_pulse} BPM")
             else:
                 messagebox.showinfo("Måling stoppet", "Målingen er stoppet, men der blev ikke registreret nogen puls.")
@@ -258,22 +268,24 @@ class PageOne(tk.Frame):
     def start_measurement(self):
         self.smooth_pulses = []  # Nulstil tidligere målinger
 
+        #Tjekker om patient er valgt
         index = self.patient_dropdown.current()
         if index < 0:
             messagebox.showwarning("Ingen patient", "Vælg en patient først.")
             return
 
+        #Finder ID på valgte patient og gemmer den i variabel
         patient_id, _ = self.patients[index]
         self.controller.selected_patient_id = patient_id
 
         # Stop evt. gammel tråd
         if self.data_thread and self.data_thread.is_alive():
-            print("🛑 Stopper tidligere måling")
+            print("Stopper tidligere måling")
             self.stop_event.set()
             self.data_thread.join()
 
         # Start ny tråd
-        print(f"▶️ Starter ny måling for patient {patient_id}")
+        print(f"Starter ny måling for patient {patient_id}")
         self.stop_event = threading.Event()
         self.data_thread = threading.Thread(
             target=lambda: Datahandler(patient_id, self.stop_event).serialdata(COMport),
@@ -290,55 +302,61 @@ class PageOne(tk.Frame):
 
     # Beregner puls baseret på EKG-data og tidsstempler.
     def beregn_puls(self, data, tider):
-        if len(data) < 10:
+        if len(data) < 10: #Venter på minimum 10 målinger for at undgå fejlmålinger
             return None
         try:
-            sekunder = np.array([(t - tider[0]).total_seconds() for t in tider])
-            signal = np.array(data)
+            sekunder = np.array([(t - tider[0]).total_seconds() for t in tider]) #numpy array med tid i sek ifht 1. mål
+            signal = np.array(data) #Array med EKG værdier
 
             # Lavpasfilter
             signal = uniform_filter1d(signal, size=5)
 
-            # Find peaks
+            # Finder peaks
             peaks, _ = find_peaks(signal, height=1000, distance=200, prominence=300)
-            if len(peaks) < 2:
+            if len(peaks) < 2: # Der skal bruges minimum 2 peaks for at kunne regne puls
                 return None
 
             # RR-interval (sekunder)
-            rr_intervaller = np.diff(sekunder[peaks])
-            rr_intervaller = rr_intervaller[(rr_intervaller > 0.3) & (rr_intervaller < 2.0)]  # 30–120 BPM
+            rr_intervaller = np.diff(sekunder[peaks]) #Beregner tid i sek mellem peaks
+            rr_intervaller = rr_intervaller[(rr_intervaller > 0.3) & (rr_intervaller < 3.5)]  # Mellem 30–210 BPM
 
+            #Der skal haves gyldige intervaller
             if len(rr_intervaller) == 0:
                 return None
 
-            rr_mean = np.mean(rr_intervaller[-5:])
-            return 60 / rr_mean if rr_mean > 0 else None
+            rr_mean = np.mean(rr_intervaller[-5:]) #Gennemsnit fra sidste 5 intervaller
+            return 60 / rr_mean if rr_mean > 0 else None #konverterer til BPM fra sek/Beat
+        #Går noget galt returneres fejlmedling
         except Exception as e:
             print("Pulsfejl:", e)
             return None
 
     # Opdaterer graf og puls i realtid med nyeste målinger.
     def update_data(self):
-        if not run:
+        if not run: #Tjekker om programmet kører
             return
 
+        #Er der ikke valgt en patient så prøv igen om 1 sekund
         patient_id = self.controller.selected_patient_id
         if not patient_id:
             self.after(1000, self.update_data)
             return
 
+        #Henter seneste 150 EKG værdier og tilhørende puls
         cursor.execute("SELECT Data, Puls FROM Ekgdata WHERE PatientID = ? ORDER BY Id DESC LIMIT 150", (patient_id,))
         results = cursor.fetchall()
 
+        #Fås der resultater
         if results:
-            data_points = [x[0] for x in results][::-1]
-            latest_pulse = results[0][1]
+            data_points = [x[0] for x in results][::-1] #Indeholder amplituder i rækkefølge
+            latest_pulse = results[0][1] #Bruges til visning før ny beregning
 
+            #Rydder grafen og tegner ny kurve
             self.ax.clear()
             self.ax.set_facecolor('white')
             self.ax.plot(range(len(data_points)), data_points, color='black')
 
-            # Ny: gitter og aksemærkninger
+            # Gitter og aksemærkninger
             self.ax.grid(True, which='both', linestyle='--', linewidth=0.5, color='gray', alpha=0.7)  # <-- ny
             self.ax.set_xlabel("Tid (målepunkt #)")  # <-- ny
             self.ax.set_ylabel("Amplitude (AD værdi)")  # <-- ny
@@ -352,11 +370,14 @@ class PageOne(tk.Frame):
             self.ax.tick_params(axis='both', labelsize=8)
             self.canvas.draw()
 
+            #Henter seneste 100 målinger inkl tid
             cursor.execute("SELECT Tidspunkt, Data FROM Ekgdata WHERE PatientID = ? ORDER BY Id DESC LIMIT 100", (patient_id,))
             rows = cursor.fetchall()[::-1]
 
+            #Viser seneste kendte beregning
             self.puls_label.config(text=str(latest_pulse))
 
+            #Tilføjer nye målinger til buffers
             for tid, val in rows:
                 try:
                     self.ekg_buffer.append(float(val))
@@ -364,12 +385,17 @@ class PageOne(tk.Frame):
                 except:
                     continue
 
+            #Kalder beregn puls med nyeste datapunkter
             dynamisk_puls = self.beregn_puls(list(self.ekg_buffer), list(self.tid_buffer))
+
+            #Udglatter ændringer i puls (exponentielt glidende avg)
             if dynamisk_puls:
                 if self.smooth_pulse is None:
                     self.smooth_pulse = dynamisk_puls
                 else:
                     self.smooth_pulse = 0.3 * dynamisk_puls + 0.7 * self.smooth_pulse  # glat overgang
+
+                #Viser puls i GUI
                 self.puls_label.config(text=f"{int(self.smooth_pulse)} BPM")
                 self.smooth_pulses.append(self.smooth_pulse)
 
@@ -382,20 +408,22 @@ class PageOne(tk.Frame):
                         )
                     """, (int(self.smooth_pulse), patient_id, patient_id))
                 conn.commit()
+            #Fås ingen værdier sættes puls til "--"
             else:
                 self.puls_label.config(text="--")
-
+        #Kører igen om 3ms (realtid)
         self.after(3,self.update_data)
 
 class PageTwo(tk.Frame):
-    # Initialiserer en side i GUI med de nødvendige widgets.
+    # Initialiserer en side i GUI med de nødvendige widgets. Arver fraq tk.Frame
     def __init__(self, parent, controller):
         super().__init__(parent, bg="lightblue")
         self.controller = controller
 
         self.patient_label = tk.Label(self, text="Målinger", font=("Helvetica", 16), bg="lightblue")
-        self.patient_label.pack(pady=10)
+        self.patient_label.pack(pady=10) #Titel
 
+        #Tabel formatering.
         self.tree = ttk.Treeview(self, columns=("Tidspunkt", "Puls", "Data"), show="headings")
         self.tree.heading("Tidspunkt", text="Tidspunkt")
         self.tree.heading("Puls", text="Puls")
@@ -405,9 +433,11 @@ class PageTwo(tk.Frame):
         self.tree.column("Data", width=100)
         self.tree.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
+        #Opdater knap
         refresh_btn = tk.Button(self, text="Opdater", command=self.refresh_data)
         refresh_btn.pack(pady=5)
 
+        #Tilbage knap
         back_btn = tk.Button(self, text="Tilbage",
                              command=lambda: controller.show_frame(StartPage))
         back_btn.pack(pady=10)
@@ -416,15 +446,16 @@ class PageTwo(tk.Frame):
 
     # Opdaterer tabellen med de nyeste målinger for valgt patient.
     def refresh_data(self):
-        for item in self.tree.get_children():
+        for item in self.tree.get_children(): #For hver del i self.tree fra constructer slettes de.
             self.tree.delete(item)
 
+        #Findes patient_id vil den vælge værdierne fra databasen og returnerer hvis ingen patient er valgt
         patient_id = self.controller.selected_patient_id
         if not patient_id:
             self.patient_label.config(text="Målinger (ingen patient valgt)")
             return
 
-        self.patient_label.config(text=f"Målinger for patient ID: {patient_id}")
+        self.patient_label.config(text=f"Målinger for patient ID: {patient_id}") #titel på side
 
         cursor.execute("""
                        SELECT strftime('%Y-%m-%d %H:%M:%S', Tidspunkt), Puls, Data
@@ -434,45 +465,52 @@ class PageTwo(tk.Frame):
                        LIMIT 100
                        """, (patient_id,))
 
+        #For hver værdi hentet til cursor indsættes det i tree
         for row in cursor.fetchall():
             self.tree.insert("", tk.END, values=row)
 
 
 class Login(tk.Frame):
     def __init__(self, parent, controller=None):
-        super().__init__(parent, bg="lightblue")
+        super().__init__(parent, bg="lightblue") #Constructor fra tk.Frame
         self.controller = controller
 
-        self.patient_data = []
+        self.patient_data = [] #Liste med patientdata oprettes til senere
 
+        #Titel på vindue
         tk.Label(self, text="Patient Login", font=("Helvetica", 16)).grid(row=0, column=0, columnspan=2, pady=10)
 
+        #Navn label og entry felt
         tk.Label(self, text="Navn:").grid(row=1, column=0, sticky="e")
         self.entry_name = tk.Entry(self)
         self.entry_name.grid(row=1, column=1)
 
+        # Alder label og entry felt
         tk.Label(self, text="Alder:").grid(row=2, column=0, sticky="e")
         self.entry_age = tk.Entry(self)
         self.entry_age.grid(row=2, column=1)
 
+        # Køn label og entry felt
         tk.Label(self, text="Køn:").grid(row=3, column=0, sticky="e")
-        self.entry_gender = tk.Entry(self)
+        self.entry_gender_var = tk.StringVar()
+        self.entry_gender = ttk.Combobox(self, textvariable=self.entry_gender_var, state="readonly")
+        self.entry_gender["values"] = ("Mand", "Kvinde", "Andet")
         self.entry_gender.grid(row=3, column=1)
 
+        #Knap til opret patient
         submit_button = tk.Button(self, text="Opret patient", command=self.submit_patient)
         submit_button.grid(row=4, column=0, columnspan=2, pady=10)
 
+        #Se patienter knap
         view_button = tk.Button(self, text="Se patienter", command=self.view_patients)
         view_button.grid(row=5, column=0, columnspan=2, pady=5)
 
-        self.patient_listbox = tk.Listbox(self, width=50)
-        self.patient_listbox.grid(row=6, column=0, columnspan=2, pady=10)
-        self.patient_listbox.bind("<<ListboxSelect>>", self.on_patient_select)
-
+        #Tilbage til patientliste knap
         self.back_button = tk.Button(self, text="Tilbage til patientliste", command=self.view_patients)
         self.back_button.grid(row=7, column=0, columnspan=2)
         self.back_button.grid_remove()  # Skjul den fra start
 
+        #Tilbage knap
         back_btn = tk.Button(self, text="Tilbage", command=lambda: controller.show_frame(StartPage))
         back_btn.grid(row=10, column=15, columnspan=2, pady=10)
 
@@ -487,17 +525,21 @@ class Login(tk.Frame):
 
     # Opretter ny patient i databasen med navn, alder og køn.
     def submit_patient(self):
+        #Henter værdier fra input felterne
         name = self.entry_name.get()
         age = self.entry_age.get()
         gender = self.entry_gender.get()
 
+        #Laver fejl hvis ikke alle felter udfyldes
         if not all([name, age, gender]):
             messagebox.showwarning("Fejl", "Alle felter skal udfyldes!")
             return
 
+        #Værdier sættes ind i database
         cursor.execute("INSERT INTO Brugerdata (Navn, Alder, KØN) VALUES (?, ?, ?)", (name, age, gender))
         conn.commit()
 
+        #Beskedboks til succes og variable wipes
         messagebox.showinfo("Succes", f"Patient {name} oprettet.")
         if self.controller:
             self.controller.frames[PageOne].load_patients()
@@ -509,25 +551,27 @@ class Login(tk.Frame):
     def view_patients(self):
         self.patient_listbox.delete(0, tk.END)
         cursor.execute("SELECT Navn, Alder, KØN FROM Brugerdata")
+
+        #Viser de hentede værdier fra databasen
         for navn, alder, køn in cursor.fetchall():
             self.patient_listbox.insert(tk.END, f"{navn} - {alder} år - {køn}")
         self.back_button.grid_remove()  # Skjul tilbage-knappen
 
     # Viser pulsmålinger for valgt patient i højre side.
     def on_patient_select(self, event):
-        selection = self.patient_listbox.curselection()
-        if not selection:
+        selection = self.patient_listbox.curselection() #Henter markeringen fra patientliste
+        if not selection: #Vælges intet stoppes den (bruger har ikke valgt noget endnu)
             return
 
-        index = selection[0]
-        cursor.execute("SELECT Id, Navn FROM Brugerdata")
+        index = selection[0] #Konverterer valget til Integer
+        cursor.execute("SELECT Id, Navn FROM Brugerdata") #Henter alle patienter fra DB
         patients = cursor.fetchall()
-        if index >= len(patients):
+        if index >= len(patients):  #Valgte patient skal passe med DB, ellers return (fejlsikring)
             return
 
-        patient_id, navn = patients[index]
+        patient_id, navn = patients[index] #Henter patients ID og navn fra index
 
-        # Hent pulsmålinger
+        # Hent 5 seneste pulsmålinger fra DB
         cursor.execute("""
                        SELECT Puls
                        FROM Pulsmålinger
@@ -537,13 +581,13 @@ class Login(tk.Frame):
                        """, (patient_id,))
         målinger = cursor.fetchall()
 
-        # Opdater højre felt (målinger)
-        self.measurement_listbox.delete(0, tk.END)
-        if målinger:
+        # Opdater højre felt (målinger) med data fra DB
+        self.measurement_listbox.delete(0, tk.END) #Tømmer højre boks inden nyt indsættes
+        if målinger: #modtages der målinger fra DB køres denne, som indsætter målingerne
             self.measurement_listbox.insert(tk.END, f"Seneste pulsmålinger for {navn} (ID {patient_id}):")
             for i, (puls,) in enumerate(målinger, 1):
                 self.measurement_listbox.insert(tk.END, f"{i}. {puls} BPM")
-        else:
+        else: #Fås ingen målinger køres denne
             self.measurement_listbox.insert(tk.END, f"Ingen pulsmålinger fundet for {navn}.")
 
 
@@ -551,6 +595,7 @@ class Login(tk.Frame):
 def on_closing():
     global run
     run = False
+    #Tjekker om tråd kører, og lukker den hvis den gør
     try:
         frame = app.frames[PageOne]
         if frame.data_thread and frame.data_thread.is_alive():
@@ -559,12 +604,12 @@ def on_closing():
     except:
         pass
 
-    conn.close()
-    app.destroy()
+    conn.close() #Lukker SQL forbindelse
+    app.destroy() #Lukker GUI vindue
 
 # Starter hovedprogrammet og konfigurerer lukke-event.
 if __name__ == "__main__":
-    app = App()
-    setattr(app, "selected_patient_id", None)
-    app.protocol("WM_DELETE_WINDOW", on_closing)
-    app.mainloop()
+    app = App() #Opretter instans af GUI
+    setattr(app, "selected_patient_id", None) #attribut der holder styr på valgte patient
+    app.protocol("WM_DELETE_WINDOW", on_closing) #Binder lukkeknappen til "on_closing"
+    app.mainloop() #TKinters hovedlykke der holder GUI i gange
