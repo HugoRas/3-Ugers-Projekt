@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-# Tilføj sti til GUI-filen så den kan importeres
+# Tilføj sti til GUI-filen så den kan importeres :P
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 import GUI_final_2_0 as gui  # Sørg for at navnet matcher din fil
 
